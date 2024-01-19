@@ -54,44 +54,46 @@ class StepResult:
 func _ready():
 	Input.set_mouse_mode(Input.MOUSE_MODE_CAPTURED)
 	
-	camera_target_position = camera.global_transform.origin
-	camera.set_as_top_level(true)
-	camera.global_transform = camera_target.global_transform
+	#camera_target_position = camera.global_transform.origin
+	#camera.set_as_top_level(true)
+	#camera.global_transform = camera_target.global_transform
 	
-	camera_gt_previous = camera_target.global_transform
-	camera_gt_current = camera_target.global_transform
+	#camera_gt_previous = camera_target.global_transform
+	#camera_gt_current = camera_target.global_transform
 
-func update_camera_transform():
-	camera_gt_previous = camera_gt_current
-	camera_gt_current = camera_target.global_transform
+#func update_camera_transform():
+	#camera_gt_previous = camera_gt_current
+	#camera_gt_current = camera_target.global_transform
 	
 func _process(delta: float) -> void:
-	if update_camera:
-		update_camera_transform()
-		update_camera = false
+	body.global_position = body.global_position.lerp(self.global_position, delta * speed * STAIRS_FEELING_COEFFICIENT)
 
-	var interpolation_fraction = clamp(Engine.get_physics_interpolation_fraction(), 0, 1)
+	#if update_camera:
+		#update_camera_transform()
+		#update_camera = false
 
-	var camera_xform = camera_gt_previous.interpolate_with(camera_gt_current, interpolation_fraction)
-	camera.global_transform = camera_xform
+	#var interpolation_fraction = clamp(Engine.get_physics_interpolation_fraction(), 0, 1)
 
-	var head_xform : Transform3D = head.get_global_transform()
+	#var camera_xform = camera_gt_previous.interpolate_with(camera_gt_current, interpolation_fraction)
+	#camera.global_transform = camera_xform
+
+	#var head_xform : Transform3D = head.get_global_transform()
 	
-	camera_target_position = lerp(camera_target_position, head_xform.origin, delta * speed * STAIRS_FEELING_COEFFICIENT * camera_lerp_coefficient)
+	#camera_target_position = lerp(camera_target_position, head_xform.origin, delta * speed * STAIRS_FEELING_COEFFICIENT * camera_lerp_coefficient)
 
-	if is_on_floor():
-		time_in_air = 0.0
-		camera_lerp_coefficient = 1.0
-		camera.position.y = camera_target_position.y
-	else:
-		time_in_air += delta
-		if time_in_air > 1.0:
-			camera_lerp_coefficient += delta
-			camera_lerp_coefficient = clamp(camera_lerp_coefficient, 2.0, 4.0)
-		else: 
-			camera_lerp_coefficient = 2.0
+	#if is_on_floor():
+		#time_in_air = 0.0
+		#camera_lerp_coefficient = 1.0
+		#camera.position.y = camera_target_position.y
+	#else:
+		#time_in_air += delta
+		#if time_in_air > 1.0:
+			#camera_lerp_coefficient += delta
+			#camera_lerp_coefficient = clamp(camera_lerp_coefficient, 2.0, 4.0)
+		#else: 
+			#camera_lerp_coefficient = 2.0
 
-		camera.position.y = camera_target_position.y
+		#camera.position.y = camera_target_position.y
 
 func _input(event):
 	if event is InputEventMouseMotion:
@@ -139,6 +141,7 @@ func _physics_process(delta):
 					gravity_direction *= SPEED_CLAMP_SLOPE_STEP_UP_COEFFICIENT
 
 		global_transform.origin += step_result.diff_position
+		body.global_transform.origin -= step_result.diff_position
 		head_offset = step_result.diff_position
 		speed = SPEED_ON_STAIRS
 	else:
